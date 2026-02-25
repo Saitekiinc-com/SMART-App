@@ -1,0 +1,29 @@
+# 環境・秘密情報
+.env
+.env.local
+.env.*.local
+*.pem
+
+# 依存関係
+node_modules/
+
+# ビルド・キャッシュ
+.next/
+out/
+dist/
+build/
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ログ・一時ファイル
+*.log
+npm-debug.log*
