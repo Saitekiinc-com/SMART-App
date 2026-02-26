@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S-05 SMARTゴール作成ウィザード（ワイヤーフレーム）</title>
+</head>
+<body style="margin:0;font-family:sans-serif;background:#f0f0f0;min-height:100vh;box-sizing:border-box;">
+  <div style="width:100%;max-width:400px;margin:0 auto;min-height:100vh;background:#fff;border:1px solid #ccc;box-shadow:0 0 12px rgba(0,0,0,0.06);">
+    <!-- アプリヘッダー（簡易） -->
+    <header style="padding:12px 16px;border-bottom:1px solid #eee;">
+      <span style="font-size:14px;">← 戻る</span>
+    </header>
+
+    <main style="padding:16px;">
+      <p style="margin:0 0 8px 0;font-size:12px;color:#888;">画面ID: S-05</p>
+      <h1 style="margin:0 0 16px 0;font-size:18px;font-weight:600;color:#333;">SMARTゴール作成ウィザード</h1>
+
+      <!-- ステップインジケーター WizardFrame -->
+      <div style="margin-bottom:24px;">
+        <p style="margin:0 0 8px 0;font-size:12px;color:#666;">ステップ 1 / 6</p>
+        <div style="display:flex;gap:4px;">
+          <span style="flex:1;height:4px;background:#333;border-radius:2px;"></span>
+          <span style="flex:1;height:4px;background:#e0e0e0;border-radius:2px;"></span>
+          <span style="flex:1;height:4px;background:#e0e0e0;border-radius:2px;"></span>
+          <span style="flex:1;height:4px;background:#e0e0e0;border-radius:2px;"></span>
+          <span style="flex:1;height:4px;background:#e0e0e0;border-radius:2px;"></span>
+          <span style="flex:1;height:4px;background:#e0e0e0;border-radius:2px;"></span>
+        </div>
+      </div>
+
+      <!-- 現在ステップのコンテンツ（1: 具体的） -->
+      <p style="margin:0 0 8px 0;font-size:12px;color:#666;">1. 具体的（Specific）</p>
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:12px;margin-bottom:4px;">ゴールのタイトル・具体的な内容</label>
+        <input type="text" placeholder="入力欄" readonly style="width:100%;padding:10px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;">
+      </div>
+
+      <!-- ステップ一覧メモ -->
+      <p style="margin:0 0 20px 0;font-size:11px;color:#999;">2.測定可能 3.達成可能 4.関連性 5.期限 6.アプローチ</p>
+
+      <!-- ボタン領域 -->
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button style="padding:10px 20px;background:#fff;border:1px solid #ccc;border-radius:4px;font-size:14px;">戻る</button>
+        <button style="flex:1;padding:10px;background:#333;color:#fff;border:none;border-radius:4px;font-size:14px;">次へ</button>
+      </div>
+      <button style="width:100%;margin-top:12px;padding:10px;background:transparent;border:none;color:#888;font-size:13px;">キャンセル</button>
+    </main>
+  </div>
+</body>
+</html>

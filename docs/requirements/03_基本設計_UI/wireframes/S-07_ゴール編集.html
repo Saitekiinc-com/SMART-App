@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S-07 ゴール編集（ワイヤーフレーム）</title>
+</head>
+<body style="margin:0;font-family:sans-serif;background:#f0f0f0;min-height:100vh;box-sizing:border-box;">
+  <div style="width:100%;max-width:400px;margin:0 auto;min-height:100vh;background:#fff;border:1px solid #ccc;box-shadow:0 0 12px rgba(0,0,0,0.06);">
+    <!-- アプリヘッダー AppHeader -->
+    <header style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #eee;">
+      <span style="font-size:14px;">← 戻る</span>
+      <div style="display:flex;gap:12px;">
+        <span style="width:24px;height:24px;border:1px solid #ccc;border-radius:4px;"></span>
+        <span style="width:24px;height:24px;border:1px solid #ccc;border-radius:50%;"></span>
+      </div>
+    </header>
+
+    <main style="padding:16px;">
+      <p style="margin:0 0 8px 0;font-size:12px;color:#888;">画面ID: S-07</p>
+      <h1 style="margin:0 0 16px 0;font-size:18px;font-weight:600;color:#333;">ゴール編集</h1>
+
+      <!-- ウィザードフレーム（編集用・同様のステップUI） -->
+      <div style="margin-bottom:24px;">
+        <p style="margin:0 0 8px 0;font-size:12px;color:#666;">ステップ 3 / 6</p>
+        <div style="display:flex;gap:4px;">
+          <span style="flex:1;height:4px;background:#333;border-radius:2px;"></span>
+          <span style="flex:1;height:4px;background:#333;border-radius:2px;"></span>
+          <span style="flex:1;height:4px;background:#333;border-radius:2px;"></span>
+          <span style="flex:1;height:4px;background:#e0e0e0;border-radius:2px;"></span>
+          <span style="flex:1;height:4px;background:#e0e0e0;border-radius:2px;"></span>
+          <span style="flex:1;height:4px;background:#e0e0e0;border-radius:2px;"></span>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:12px;margin-bottom:4px;">達成可能（Achievable）</label>
+        <input type="text" placeholder="既存ゴールの編集内容" readonly style="width:100%;padding:10px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;">
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button style="padding:10px 20px;background:#fff;border:1px solid #ccc;border-radius:4px;font-size:14px;">戻る</button>
+        <button style="flex:1;padding:10px;background:#333;color:#fff;border:none;border-radius:4px;font-size:14px;">次へ</button>
+      </div>
+      <button style="width:100%;margin-top:12px;padding:10px;background:transparent;border:none;color:#888;font-size:13px;">キャンセル</button>
+    </main>
+  </div>
+</body>
+</html>

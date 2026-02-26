@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S-04 チームダッシュボード（ワイヤーフレーム）</title>
+</head>
+<body style="margin:0;font-family:sans-serif;background:#f0f0f0;min-height:100vh;box-sizing:border-box;">
+  <div style="width:100%;max-width:400px;margin:0 auto;min-height:100vh;background:#fff;border:1px solid #ccc;box-shadow:0 0 12px rgba(0,0,0,0.06);position:relative;">
+    <!-- アプリヘッダー AppHeader -->
+    <header style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #eee;background:#fff;">
+      <span style="font-size:14px;font-weight:600;">チーム名</span>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="width:24px;height:24px;border:1px solid #ccc;border-radius:4px;" title="通知"></span>
+        <span style="width:24px;height:24px;border:1px solid #ccc;border-radius:50%;" title="チーム切替"></span>
+        <span style="width:24px;height:24px;border:1px solid #ccc;border-radius:50%;" title="ユーザー"></span>
+        <span style="font-size:11px;color:#666;">設定（リーダーのみ）</span>
+      </div>
+    </header>
+
+    <main style="padding:16px;padding-bottom:80px;">
+      <p style="margin:0 0 8px 0;font-size:12px;color:#888;">画面ID: S-04</p>
+      <h1 style="margin:0 0 16px 0;font-size:18px;font-weight:600;color:#333;">チームダッシュボード</h1>
+
+      <!-- サマリーセクション DashboardSummary -->
+      <div style="background:#f5f5f5;border-radius:8px;padding:16px;margin-bottom:20px;border:1px solid #e0e0e0;">
+        <p style="margin:0 0 8px 0;font-size:12px;color:#666;">サマリー</p>
+        <p style="margin:0;font-size:14px;">進行中: 3件　完了: 5件　達成率: 62%</p>
+      </div>
+
+      <!-- フィルター（任意） -->
+      <div style="margin-bottom:12px;">
+        <span style="font-size:12px;padding:6px 10px;border:1px solid #ccc;border-radius:4px;margin-right:8px;">すべて</span>
+        <span style="font-size:12px;padding:6px 10px;border:1px solid #ddd;border-radius:4px;color:#888;">未着手</span>
+        <span style="font-size:12px;padding:6px 10px;border:1px solid #ddd;border-radius:4px;color:#888;">進行中</span>
+        <span style="font-size:12px;padding:6px 10px;border:1px solid #ddd;border-radius:4px;color:#888;">完了</span>
+      </div>
+
+      <!-- ゴールカード GoalCard x2 -->
+      <div style="border:1px solid #ccc;border-radius:8px;padding:14px;margin-bottom:12px;cursor:pointer;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <span style="font-size:14px;font-weight:600;">ゴールタイトル例 1</span>
+          <span style="font-size:11px;padding:2px 8px;background:#e8f5e9;color:#2e7d32;border-radius:4px;">進行中</span>
+        </div>
+        <p style="margin:0 0 8px 0;font-size:12px;color:#666;">投票: 2票　アプローチ進捗: 2/5</p>
+      </div>
+      <div style="border:1px solid #ccc;border-radius:8px;padding:14px;margin-bottom:12px;cursor:pointer;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <span style="font-size:14px;font-weight:600;">ゴールタイトル例 2</span>
+          <span style="font-size:11px;padding:2px 8px;background:#fff3e0;color:#e65100;border-radius:4px;">未着手</span>
+        </div>
+        <p style="margin:0;font-size:12px;color:#666;">投票: 0票　アプローチ進捗: 0/4</p>
+      </div>
+    </main>
+
+    <!-- FAB Floating Action Button -->
+    <div style="position:absolute;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:#333;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,0.2);">+</div>
+  </div>
+</body>
+</html>
