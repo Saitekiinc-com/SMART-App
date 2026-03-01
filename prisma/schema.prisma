@@ -1,0 +1,14 @@
+// SMART Team Goals - Prisma Schema
+// 06_詳細設計_データ設計/01_データベース詳細設計書 に準拠
+// マイグレーション: prisma/migrations/
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// TODO: テーブル定義（users, teams, team_members, smart_goals, approaches, votes, invitations, notifications）

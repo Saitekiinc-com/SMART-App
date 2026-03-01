@@ -27,3 +27,6 @@ Thumbs.db
 # ログ・一時ファイル
 *.log
 npm-debug.log*
+
+01_WBS/
+98_Archive/
