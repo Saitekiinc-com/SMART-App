@@ -14,9 +14,39 @@ export default function TeamSettingsPage({
 }) {
   const { teamId } = use(params);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+
+  async function handleOpenInviteModal() {
+    setInviteError(null);
+    setInviteLoading(true);
+    try {
+      const res = await fetch(`/api/teams/${teamId}/invites`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setInviteError(data.error ?? "招待リンクの生成に失敗しました");
+        return;
+      }
+      setInviteUrl(data.inviteUrl ?? null);
+      setShowInviteModal(true);
+    } catch {
+      setInviteError("通信エラーです");
+    } finally {
+      setInviteLoading(false);
+    }
+  }
+
+  function handleCloseInviteModal() {
+    setShowInviteModal(false);
+    setInviteUrl(null);
+  }
+
   return (
     <div className="w-full max-w-[400px] min-h-screen mx-auto bg-white border border-gray-300 shadow-sm">
-      {showInviteModal && <InviteLinkModal onClose={() => setShowInviteModal(false)} />}
+      {showInviteModal && inviteUrl && (
+        <InviteLinkModal inviteUrl={inviteUrl} onClose={handleCloseInviteModal} />
+      )}
       <header className="flex items-center justify-between py-3 px-4 border-b border-gray-200">
         <Link href={`/dashboard/${teamId}`} className="text-sm text-gray-700">
           ← 戻る
@@ -72,11 +102,18 @@ export default function TeamSettingsPage({
           </ul>
         </div>
 
+        {inviteError && (
+          <p className="text-sm text-red-600 mb-2" role="alert">
+            {inviteError}
+          </p>
+        )}
         <button
           type="button"
-          className="w-full py-3 bg-white border border-gray-800 rounded text-sm"
-          onClick={() => setShowInviteModal(true)}>
-          招待リンクを生成
+          className="w-full py-3 bg-white border border-gray-800 rounded text-sm disabled:opacity-50"
+          onClick={handleOpenInviteModal}
+          disabled={inviteLoading}
+        >
+          {inviteLoading ? "生成中…" : "招待リンクを生成"}
         </button>
       </main>
     </div>
