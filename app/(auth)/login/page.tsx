@@ -1,20 +1,38 @@
 /**
  * S-01: ログイン / サインアップ
- * AuthForm を配置
  */
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { signIn } from "@/auth";
 
 async function handleLogin(formData: FormData) {
   "use server";
-  await signIn("credentials", formData);
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  try {
+    await signIn("credentials", { email, password, redirectTo: "/teams" });
+  } catch (e) {
+    const err = e as { code?: string; type?: string };
+    if (err?.code === "CredentialsSignin" || err?.type === "CredentialsSignin") {
+      redirect("/login?error=CredentialsSignin");
+    }
+    throw e;
+  }
 }
 
 async function handleGoogleLogin() {
   "use server";
-  await signIn("google", { redirectTo: "/" });
+  await signIn("google", { redirectTo: "/teams" });
 }
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; registered?: string }>;
+}) {
+  const params = await searchParams;
+  const isCredentialsError = params.error === "CredentialsSignin";
+
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-md border border-gray-100 p-6 sm:p-8">
@@ -22,6 +40,17 @@ export default function LoginPage() {
           <h1 className="text-xl font-semibold text-gray-900">SMART Team Goals</h1>
           <p className="mt-1 text-sm text-gray-500">ログインしてチームのゴールを管理しましょう</p>
         </header>
+
+        {isCredentialsError && (
+          <div className="mb-4 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
+            メールアドレスまたはパスワードが正しくありません。アカウントがない場合はサインアップしてください。
+          </div>
+        )}
+        {params.registered === "1" && (
+          <div className="mb-4 rounded-md bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-800">
+            登録が完了しました。ログインしてください。
+          </div>
+        )}
 
         <form action={handleLogin} className="space-y-4">
           <div className="space-y-1">
@@ -78,7 +107,11 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-4 text-center text-xs text-gray-400">
-          まだアカウントをお持ちでない場合は、Google ログインから新規登録されます。
+          アカウントがない場合は
+          <Link href="/signup" className="ml-1 text-indigo-600 hover:underline">
+            サインアップ
+          </Link>
+          または Google でログインしてください。
         </p>
       </div>
     </main>
