@@ -13,11 +13,11 @@ export function NotificationTrigger() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-6 h-6 border border-gray-300 rounded flex items-center justify-center hover:bg-gray-100"
+        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded"
         title="通知"
         aria-label="通知一覧を開く"
       >
-        <span className="sr-only">通知</span>
+        <span className="text-lg" aria-hidden>🔔</span>
       </button>
       {open && <NotificationListModal onClose={() => setOpen(false)} />}
     </>

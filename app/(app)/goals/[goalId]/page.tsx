@@ -161,7 +161,9 @@ export default function GoalDetailPage() {
         </Link>
         <div className="flex gap-3">
           <NotificationTrigger />
-          <Link href="/teams" className="w-6 h-6 border border-gray-300 rounded-full" title="チーム切替" />
+          <Link href="/teams" className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded" title="チーム切替">
+            <span className="text-lg" aria-hidden>👤</span>
+          </Link>
         </div>
       </header>
 
