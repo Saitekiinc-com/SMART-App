@@ -69,7 +69,7 @@ export function NotificationListModal({ onClose }: NotificationListModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-start justify-center p-6 box-border z-50">
-      <div className="w-full max-w-[360px] bg-white rounded-xl shadow-xl overflow-hidden">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden">
         <div className="flex justify-between items-center py-4 px-4 border-b border-gray-200">
           <h2 className="text-base font-semibold m-0">通知一覧</h2>
           <button

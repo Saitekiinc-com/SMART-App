@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { InviteLinkModal } from "@/components/invite/InviteLinkModal";
-import { NotificationTrigger } from "@/components/notifications/NotificationTrigger";
+import { AppHeader } from "@/components/AppHeader";
 
 type MemberItem = {
   id: string;
@@ -150,19 +150,17 @@ export function TeamSettingsClient({ teamId, teamName, teamDescription }: TeamSe
   }
 
   return (
-    <div className="w-full max-w-[400px] min-h-screen mx-auto bg-white border border-gray-300 shadow-sm">
+    <div className="w-full max-w-3xl min-h-screen mx-auto bg-white border border-gray-300 shadow-sm">
       {showInviteModal && inviteUrl && (
         <InviteLinkModal inviteUrl={inviteUrl} onClose={handleCloseInviteModal} />
       )}
-      <header className="flex items-center justify-between py-3 px-4 border-b border-gray-200">
-        <Link href={`/dashboard/${teamId}`} className="text-sm text-gray-700">
-          ← 戻る
-        </Link>
-        <div className="flex gap-3">
-          <NotificationTrigger />
-          <span className="w-8 h-8 flex items-center justify-center text-lg" title="ユーザー" aria-hidden>👤</span>
-        </div>
-      </header>
+      <AppHeader
+        leftContent={
+          <Link href={`/dashboard/${teamId}`} className="text-sm text-gray-700 hover:underline">
+            ← 戻る
+          </Link>
+        }
+      />
 
       <main className="p-4">
         <p className="text-xs text-gray-400 mb-2">画面ID: S-09　※リーダーのみアクセス可</p>
@@ -203,7 +201,7 @@ export function TeamSettingsClient({ teamId, teamName, teamDescription }: TeamSe
             onClick={handleSaveTeam}
             disabled={teamSaveLoading}
             className="py-2 px-4 bg-gray-800 text-white rounded text-[13px] disabled:opacity-50"
-          >
+            >
             {teamSaveLoading ? "保存中…" : "保存"}
           </button>
         </div>

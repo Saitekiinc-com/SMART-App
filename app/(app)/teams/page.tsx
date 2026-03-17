@@ -92,7 +92,7 @@ export default function TeamSelectPage() {
 
   return (
     <main className="min-h-screen bg-gray-100 px-4 py-4">
-      <div className="w-full max-w-[400px] mx-auto bg-white border border-gray-300 rounded-lg p-6 shadow-sm">
+      <div className="w-full max-w-3xl mx-auto bg-white border border-gray-300 rounded-lg p-6 shadow-sm">
         <p className="text-xs text-gray-400 mb-2">画面ID: S-03</p>
         <h1 className="text-xl font-semibold text-gray-800 mb-6">チーム選択</h1>
 

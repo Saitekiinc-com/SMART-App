@@ -6,6 +6,7 @@
  */
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { AppHeader } from "@/components/AppHeader";
 import { useEffect, useState } from "react";
 
 type Goal = {
@@ -128,7 +129,7 @@ export default function GoalEditPage() {
 
   if (!goal && !error) {
     return (
-      <div className="w-full max-w-[400px] min-h-screen mx-auto bg-white p-4">
+      <div className="w-full max-w-3xl min-h-screen mx-auto bg-white p-4">
         <p className="text-sm text-gray-500">読み込み中…</p>
       </div>
     );
@@ -136,7 +137,7 @@ export default function GoalEditPage() {
 
   if (error && !goal) {
     return (
-      <div className="w-full max-w-[400px] min-h-screen mx-auto bg-white p-4">
+      <div className="w-full max-w-3xl min-h-screen mx-auto bg-white p-4">
         <p className="text-sm text-red-600">{error}</p>
         <Link href="/teams" className="mt-2 inline-block text-sm underline">チーム一覧へ</Link>
       </div>
@@ -145,7 +146,7 @@ export default function GoalEditPage() {
 
   if (goal && !goal.canEdit) {
     return (
-      <div className="w-full max-w-[400px] min-h-screen mx-auto bg-white p-4">
+      <div className="w-full max-w-3xl min-h-screen mx-auto bg-white p-4">
         <p className="text-sm text-gray-600">編集する権限がありません。</p>
         <Link href={`/goals/${goalId}`} className="mt-2 inline-block text-sm text-indigo-600 underline">
           ゴール詳細へ戻る
@@ -155,12 +156,14 @@ export default function GoalEditPage() {
   }
 
   return (
-    <div className="w-full max-w-[400px] min-h-screen mx-auto bg-white border border-gray-300 shadow-sm">
-      <header className="py-3 px-4 border-b border-gray-200">
-        <Link href={`/goals/${goalId}`} className="text-sm text-gray-700 hover:underline">
-          ← 戻る
-        </Link>
-      </header>
+    <div className="w-full max-w-3xl min-h-screen mx-auto bg-white border border-gray-300 shadow-sm">
+      <AppHeader
+        leftContent={
+          <Link href={`/goals/${goalId}`} className="text-sm text-gray-700 hover:underline">
+            ← 戻る
+          </Link>
+        }
+      />
 
       <main className="p-4">
         <p className="text-xs text-gray-400 mb-2">画面ID: S-07</p>

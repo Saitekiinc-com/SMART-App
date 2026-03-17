@@ -178,7 +178,7 @@ export default function NewGoalWizardPage() {
   const isLastStep = step === 5;
 
   return (
-    <div className="w-full max-w-[400px] min-h-screen mx-auto bg-white border border-gray-300 shadow-sm">
+    <div className="w-full max-w-3xl min-h-screen mx-auto bg-white border border-gray-300 shadow-sm">
       <header className="py-3 px-4 border-b border-gray-200">
         <Link href={`/dashboard/${teamId}`} className="text-sm text-gray-700 hover:underline">
           ← 戻る

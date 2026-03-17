@@ -6,7 +6,7 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { NotificationTrigger } from "@/components/notifications/NotificationTrigger";
+import { AppHeader } from "@/components/AppHeader";
 
 const STATUS_LABEL: Record<string, string> = {
   TODO: "未着手",
@@ -81,24 +81,16 @@ export default async function DashboardPage({
   const achievedRate = total > 0 ? Math.round((done / total) * 100) : 0;
 
   return (
-    <div className="w-full max-w-[400px] min-h-screen mx-auto bg-white border border-gray-300 shadow-sm relative">
-      <header className="flex items-center justify-between py-3 px-4 border-b border-gray-200 bg-white">
-        <span className="text-sm font-semibold truncate max-w-[180px]" title={team.name}>
-          {team.name}
-        </span>
-        <div className="flex items-center gap-3">
-          <NotificationTrigger />
-          <Link href="/teams" className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded" title="チーム切替">
-            <span className="text-lg" aria-hidden>👤</span>
-          </Link>
-          <Link href="/teams?create=1" className="text-[11px] text-indigo-600 hover:underline" title="新しいチームを作成">
-            チームを追加
-          </Link>
-          <Link href={`/settings/${teamId}`} className="text-[11px] text-gray-500">
-            設定（リーダーのみ）
-          </Link>
-        </div>
-      </header>
+    <div className="w-full max-w-3xl min-h-screen mx-auto bg-white border border-gray-300 shadow-sm relative">
+      <AppHeader
+        leftContent={
+          <span className="text-sm font-semibold truncate max-w-[180px]" title={team.name}>
+            {team.name}
+          </span>
+        }
+        teamId={teamId}
+        showSettingsLink={membership.role === "leader"}
+      />
 
       <main className="p-4 pb-20">
         <p className="text-xs text-gray-400 mb-2">画面ID: S-04</p>

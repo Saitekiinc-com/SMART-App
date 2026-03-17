@@ -74,7 +74,7 @@ export default function InviteAcceptPage({
 
   return (
     <main className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-      <div className="w-full max-w-[400px] bg-white border border-gray-300 rounded-lg p-6 shadow-sm">
+      <div className="w-full max-w-3xl bg-white border border-gray-300 rounded-lg p-6 shadow-sm">
         <p className="text-xs text-gray-400 mb-2">画面ID: S-02</p>
         <h1 className="text-xl font-semibold text-gray-800 mb-6">招待受諾画面</h1>
 
