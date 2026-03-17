@@ -40,11 +40,17 @@ export default async function TeamSettingsPage({
 
   const team = await prisma.team.findUnique({
     where: { id: teamId },
-    select: { name: true },
+    select: { name: true, description: true },
   });
   if (!team) {
     redirect(`/dashboard/${teamId}`);
   }
 
-  return <TeamSettingsClient teamId={teamId} teamName={team.name} />;
+  return (
+    <TeamSettingsClient
+      teamId={teamId}
+      teamName={team.name}
+      teamDescription={team.description ?? ""}
+    />
+  );
 }

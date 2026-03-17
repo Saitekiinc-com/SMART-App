@@ -30,3 +30,5 @@ npm-debug.log*
 
 01_WBS/
 98_Archive/
+docs/requirements/
+scripts/

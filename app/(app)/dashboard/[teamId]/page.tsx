@@ -91,6 +91,9 @@ export default async function DashboardPage({
           <Link href="/teams" className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded" title="チーム切替">
             <span className="text-lg" aria-hidden>👤</span>
           </Link>
+          <Link href="/teams?create=1" className="text-[11px] text-indigo-600 hover:underline" title="新しいチームを作成">
+            チームを追加
+          </Link>
           <Link href={`/settings/${teamId}`} className="text-[11px] text-gray-500">
             設定（リーダーのみ）
           </Link>

@@ -16,19 +16,31 @@ type MemberItem = {
 interface TeamSettingsClientProps {
   teamId: string;
   teamName: string;
+  teamDescription: string;
 }
 
-export function TeamSettingsClient({ teamId, teamName }: TeamSettingsClientProps) {
+export function TeamSettingsClient({ teamId, teamName, teamDescription }: TeamSettingsClientProps) {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
+
+  const [name, setName] = useState(teamName);
+  const [description, setDescription] = useState(teamDescription);
+  const [teamSaveLoading, setTeamSaveLoading] = useState(false);
+  const [teamSaveError, setTeamSaveError] = useState("");
+  const [teamSaveSuccess, setTeamSaveSuccess] = useState(false);
 
   const [members, setMembers] = useState<MemberItem[]>([]);
   const [membersLoading, setMembersLoading] = useState(true);
   const [membersError, setMembersError] = useState("");
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [promotingUserId, setPromotingUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setName(teamName);
+    setDescription(teamDescription);
+  }, [teamName, teamDescription]);
 
   useEffect(() => {
     fetchMembers();
@@ -93,6 +105,29 @@ export function TeamSettingsClient({ teamId, teamName }: TeamSettingsClientProps
     }
   }
 
+  async function handleSaveTeam() {
+    setTeamSaveError("");
+    setTeamSaveSuccess(false);
+    setTeamSaveLoading(true);
+    try {
+      const res = await fetch(`/api/teams/${teamId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), description: description.trim() || null }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setTeamSaveError((data.error as string) ?? "保存に失敗しました");
+        return;
+      }
+      if (data.name !== undefined) setName(data.name);
+      if (data.description !== undefined) setDescription(data.description ?? "");
+      setTeamSaveSuccess(true);
+    } finally {
+      setTeamSaveLoading(false);
+    }
+  }
+
   async function handlePromoteToLeader(userId: string) {
     if (!confirm("このメンバーをリーダーにしますか？自分はメンバーになります。")) return;
     setPromotingUserId(userId);
@@ -139,16 +174,37 @@ export function TeamSettingsClient({ teamId, teamName }: TeamSettingsClientProps
             <label className="block text-xs mb-1">チーム名</label>
             <input
               type="text"
-              value={teamName}
-              readOnly
-              className="w-full py-2.5 px-2.5 border border-gray-300 rounded box-border"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={50}
+              className="w-full py-2.5 px-2.5 border border-gray-300 rounded box-border text-sm"
             />
+            <p className="text-[11px] text-gray-400 mt-0.5">{name.length}/50</p>
           </div>
+          <div className="mb-3">
+            <label className="block text-xs mb-1">説明（任意）</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              maxLength={200}
+              rows={3}
+              className="w-full py-2.5 px-2.5 border border-gray-300 rounded box-border text-sm resize-none"
+            />
+            <p className="text-[11px] text-gray-400 mt-0.5">{description.length}/200</p>
+          </div>
+          {teamSaveError && (
+            <p className="text-sm text-red-600 mb-2" role="alert">{teamSaveError}</p>
+          )}
+          {teamSaveSuccess && (
+            <p className="text-sm text-green-600 mb-2">保存しました</p>
+          )}
           <button
             type="button"
-            className="py-2 px-4 bg-gray-800 text-white rounded text-[13px]"
+            onClick={handleSaveTeam}
+            disabled={teamSaveLoading}
+            className="py-2 px-4 bg-gray-800 text-white rounded text-[13px] disabled:opacity-50"
           >
-            保存
+            {teamSaveLoading ? "保存中…" : "保存"}
           </button>
         </div>
 

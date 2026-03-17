@@ -6,12 +6,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type TeamItem = { id: string; name: string; role: "leader" | "member" };
 
 export default function TeamSelectPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const wantCreate = searchParams.get("create") === "1";
+
   const [teams, setTeams] = useState<TeamItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +22,7 @@ export default function TeamSelectPage() {
   const [createDescription, setCreateDescription] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(wantCreate);
 
   const fetchTeams = async () => {
     const res = await fetch("/api/teams");
@@ -37,10 +41,11 @@ export default function TeamSelectPage() {
         const list = await fetchTeams();
         if (cancelled) return;
         setTeams(list);
-        if (list.length === 1) {
+        if (list.length === 1 && !wantCreate) {
           router.replace(`/dashboard/${list[0].id}`);
           return;
         }
+        if (wantCreate) setShowCreateForm(true);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "エラーが発生しました");
       } finally {
@@ -50,7 +55,7 @@ export default function TeamSelectPage() {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, wantCreate]);
 
   const roleLabel = (role: string) => (role === "leader" ? "リーダー" : "メンバー");
 
@@ -102,70 +107,96 @@ export default function TeamSelectPage() {
           <p className="text-sm text-red-600 py-2">{error}</p>
         )}
         {!loading && !error && teams.length === 0 && (
+          <p className="text-sm text-gray-500 py-2">
+            所属チームがありません。下のフォームでチームを作成するか、招待リンクから参加してください。
+          </p>
+        )}
+        {!loading && teams.length > 0 && (
           <>
-            <p className="text-sm text-gray-500 py-2">
-              所属チームがありません。チームを作成するか、招待リンクから参加してください。
-            </p>
-            <form onSubmit={handleCreateTeam} className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50 space-y-3">
-              <h2 className="text-sm font-medium text-gray-700">チームを作成</h2>
-              {createError && (
-                <p className="text-sm text-red-600">{createError}</p>
+            <ul className="list-none p-0 m-0 space-y-2">
+              {teams.map((team) => (
+                <li key={team.id}>
+                  <Link
+                    href={`/dashboard/${team.id}`}
+                    className="block border border-gray-300 rounded-md py-4 px-4 bg-gray-50 hover:bg-gray-100 cursor-pointer"
+                  >
+                    <span className="text-base font-medium">{team.name}</span>
+                    <span className="text-xs text-gray-500 block mt-1">
+                      {roleLabel(team.role)}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {!showCreateForm && (
+              <p className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateForm(true)}
+                  className="text-sm text-indigo-600 hover:underline"
+                >
+                  ＋ 新しいチームを作成
+                </button>
+              </p>
+            )}
+          </>
+        )}
+        {(showCreateForm || teams.length === 0) && !loading && (
+          <form onSubmit={handleCreateTeam} className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50 space-y-3">
+            <h2 className="text-sm font-medium text-gray-700">
+              {teams.length === 0 ? "チームを作成" : "新しいチームを作成"}
+            </h2>
+            {createError && (
+              <p className="text-sm text-red-600">{createError}</p>
+            )}
+            <div>
+              <label htmlFor="team-name" className="block text-xs text-gray-600 mb-1">チーム名（必須）</label>
+              <input
+                id="team-name"
+                type="text"
+                value={createName}
+                onChange={(e) => setCreateName(e.target.value)}
+                placeholder="例: 開発チーム"
+                maxLength={50}
+                className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                disabled={creating}
+              />
+            </div>
+            <div>
+              <label htmlFor="team-desc" className="block text-xs text-gray-600 mb-1">説明（任意）</label>
+              <textarea
+                id="team-desc"
+                value={createDescription}
+                onChange={(e) => setCreateDescription(e.target.value)}
+                placeholder="チームの説明"
+                maxLength={200}
+                rows={2}
+                className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                disabled={creating}
+              />
+            </div>
+            <div className="flex gap-2">
+              {teams.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowCreateForm(false)}
+                  className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  キャンセル
+                </button>
               )}
-              <div>
-                <label htmlFor="team-name" className="block text-xs text-gray-600 mb-1">チーム名（必須）</label>
-                <input
-                  id="team-name"
-                  type="text"
-                  value={createName}
-                  onChange={(e) => setCreateName(e.target.value)}
-                  placeholder="例: 開発チーム"
-                  maxLength={50}
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                  disabled={creating}
-                />
-              </div>
-              <div>
-                <label htmlFor="team-desc" className="block text-xs text-gray-600 mb-1">説明（任意）</label>
-                <textarea
-                  id="team-desc"
-                  value={createDescription}
-                  onChange={(e) => setCreateDescription(e.target.value)}
-                  placeholder="チームの説明"
-                  maxLength={200}
-                  rows={2}
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                  disabled={creating}
-                />
-              </div>
               <button
                 type="submit"
                 disabled={creating || !createName.trim()}
-                className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
               >
-                {creating ? "作成中…" : "作成してダッシュボードへ"}
+                {creating ? "作成中…" : teams.length === 0 ? "作成してダッシュボードへ" : "作成"}
               </button>
-            </form>
-          </>
-        )}
-        {!loading && teams.length > 0 && (
-          <ul className="list-none p-0 m-0 space-y-2">
-            {teams.map((team) => (
-              <li key={team.id}>
-                <Link
-                  href={`/dashboard/${team.id}`}
-                  className="block border border-gray-300 rounded-md py-4 px-4 bg-gray-50 hover:bg-gray-100 cursor-pointer"
-                >
-                  <span className="text-base font-medium">{team.name}</span>
-                  <span className="text-xs text-gray-500 block mt-1">
-                    {roleLabel(team.role)}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+            </div>
+          </form>
         )}
         <p className="text-[11px] text-gray-400 mt-4">
-          ※ 所属1チームの場合は自動でダッシュボードへ移動します
+          ※ 所属1チームの場合は自動でダッシュボードへ移動します。「チームを追加」から新規作成できます。
         </p>
       </div>
     </main>
