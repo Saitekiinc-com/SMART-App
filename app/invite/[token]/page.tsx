@@ -26,6 +26,7 @@ export default function InviteAcceptPage({
   const [error, setError] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
   const [acceptError, setAcceptError] = useState<string | null>(null);
+  const [isAuthed, setIsAuthed] = useState<boolean>(false);
 
   useEffect(() => {
     if (!token) {
@@ -33,6 +34,18 @@ export default function InviteAcceptPage({
       setLoading(false);
       return;
     }
+
+    // ログイン状態を判定（NextAuth セッション）
+    fetch("/api/auth/session")
+      .then(async (res) => {
+        if (!res.ok) return null;
+        return res.json().catch(() => null);
+      })
+      .then((session) => {
+        setIsAuthed(!!session?.user);
+      })
+      .catch(() => setIsAuthed(false));
+
     fetch(`/api/invites/${encodeURIComponent(token)}`)
       .then((res) => res.json())
       .then((data) => {
@@ -51,8 +64,23 @@ export default function InviteAcceptPage({
       .finally(() => setLoading(false));
   }, [token]);
 
+  function handleCancel() {
+    // 「前の画面へ戻る」（履歴がなければチーム選択へフォールバック）
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+      return;
+    }
+    router.push("/teams");
+  }
+
   async function handleAccept() {
     if (!token || !invite) return;
+    if (!isAuthed) {
+      // 未ログイン時は誘導リンクへ（設計書方針）
+      router.push(`/login?callbackUrl=${encodeURIComponent(`/invite/${token}`)}`);
+      return;
+    }
+    if (!confirm("参加しますか？")) return;
     setAcceptError(null);
     setAccepting(true);
     try {
@@ -104,24 +132,48 @@ export default function InviteAcceptPage({
                 {acceptError}
               </p>
             )}
-            <button
-              type="button"
-              onClick={handleAccept}
-              disabled={accepting}
-              className="w-full py-3 bg-gray-800 text-white rounded border-none text-sm font-medium disabled:opacity-50"
-            >
-              {accepting ? "参加処理中…" : "参加する"}
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={accepting}
+                className="flex-1 py-3 bg-white text-gray-800 rounded border border-gray-300 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
+              >
+                キャンセル
+              </button>
+              {isAuthed ? (
+                <button
+                  type="button"
+                  onClick={handleAccept}
+                  disabled={accepting}
+                  className="flex-1 py-3 bg-gray-800 text-white rounded border-none text-sm font-medium disabled:opacity-50"
+                >
+                  {accepting ? "参加処理中…" : "参加する"}
+                </button>
+              ) : (
+                <Link
+                  href={`/login?callbackUrl=${encodeURIComponent(`/invite/${token}`)}`}
+                  className="flex-1 inline-flex items-center justify-center py-3 bg-gray-800 text-white rounded border-none text-sm font-medium hover:bg-gray-700 disabled:opacity-50"
+                >
+                  ログインして参加
+                </Link>
+              )}
+            </div>
           </div>
         )}
 
-        <p className="text-xs text-gray-400 text-center">
-          未ログインの場合は
-          <Link href={`/login?callbackUrl=${encodeURIComponent(`/invite/${token}`)}`} className="text-indigo-600 underline ml-1">
-            サインアップ／ログインへ
-          </Link>
-          リンクで S-01 へ誘導
-        </p>
+        {!isAuthed && (
+          <p className="text-xs text-gray-400 text-center">
+            未ログインの場合は
+            <Link
+              href={`/login?callbackUrl=${encodeURIComponent(`/invite/${token}`)}`}
+              className="text-indigo-600 underline ml-1"
+            >
+              サインアップ／ログインへ
+            </Link>
+            リンクで S-01 へ誘導
+          </p>
+        )}
       </div>
     </main>
   );
