@@ -163,5 +163,24 @@ export async function POST(
     });
   }
 
+  // F-013: 新ゴール作成 → チーム全員（作成者以外）に通知
+  const creatorName = user.name ?? session.user?.name ?? "メンバー";
+  const message = `${creatorName}さんが「${goal.title}」を新規作成しました`.slice(0, 500);
+  const teamMembers = await prisma.teamMember.findMany({
+    where: { teamId },
+    select: { userId: true },
+  });
+  const recipientIds = teamMembers.filter((m) => m.userId !== user.id).map((m) => m.userId);
+  if (recipientIds.length > 0) {
+    await prisma.notification.createMany({
+      data: recipientIds.map((userId) => ({
+        userId,
+        type: "GOAL_CREATED",
+        message,
+        goalId: goal.id,
+      })),
+    });
+  }
+
   return Response.json({ id: goal.id }, { status: 201 });
 }

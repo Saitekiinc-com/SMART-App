@@ -6,7 +6,7 @@
  */
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader, getBackHeaderProps } from "@/components/AppHeader";
 import { useEffect, useState } from "react";
 
 type Goal = {
@@ -157,13 +157,7 @@ export default function GoalEditPage() {
 
   return (
     <div className="w-full max-w-3xl min-h-screen mx-auto bg-white border border-gray-300 shadow-sm">
-      <AppHeader
-        leftContent={
-          <Link href={`/goals/${goalId}`} className="text-sm text-gray-700 hover:underline">
-            ← 戻る
-          </Link>
-        }
-      />
+      <AppHeader {...getBackHeaderProps(`/goals/${goalId}`)} />
 
       <main className="p-4">
         <p className="text-xs text-gray-400 mb-2">画面ID: S-07</p>

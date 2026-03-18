@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { InviteLinkModal } from "@/components/invite/InviteLinkModal";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader, getBackHeaderProps } from "@/components/AppHeader";
 
 type MemberItem = {
   id: string;
@@ -154,13 +154,7 @@ export function TeamSettingsClient({ teamId, teamName, teamDescription }: TeamSe
       {showInviteModal && inviteUrl && (
         <InviteLinkModal inviteUrl={inviteUrl} onClose={handleCloseInviteModal} />
       )}
-      <AppHeader
-        leftContent={
-          <Link href={`/dashboard/${teamId}`} className="text-sm text-gray-700 hover:underline">
-            ← 戻る
-          </Link>
-        }
-      />
+      <AppHeader {...getBackHeaderProps(`/dashboard/${teamId}`)} />
 
       <main className="p-4">
         <p className="text-xs text-gray-400 mb-2">画面ID: S-09　※リーダーのみアクセス可</p>

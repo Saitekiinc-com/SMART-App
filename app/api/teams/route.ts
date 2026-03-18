@@ -73,6 +73,19 @@ export async function POST(request: Request) {
     return Response.json({ error: `説明は${DESCRIPTION_MAX}文字以内にしてください` }, { status: 400 });
   }
 
+  // Notion 要件: チーム作成はリーダーのみ。0チームのときは1つ作成可（作成者がリーダーになる）
+  const memberships = await prisma.teamMember.findMany({
+    where: { userId: user.id },
+    select: { role: true },
+  });
+  const isLeaderOfAny = memberships.some((m) => m.role === "leader");
+  if (memberships.length > 0 && !isLeaderOfAny) {
+    return Response.json(
+      { error: "チームの新規作成は、いずれかのチームのリーダーのみ可能です。" },
+      { status: 403 }
+    );
+  }
+
   const team = await prisma.team.create({
     data: {
       name,

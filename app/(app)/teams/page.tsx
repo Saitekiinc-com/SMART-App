@@ -41,10 +41,6 @@ export default function TeamSelectPage() {
         const list = await fetchTeams();
         if (cancelled) return;
         setTeams(list);
-        if (list.length === 1 && !wantCreate) {
-          router.replace(`/dashboard/${list[0].id}`);
-          return;
-        }
         if (wantCreate) setShowCreateForm(true);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "エラーが発生しました");
@@ -95,11 +91,6 @@ export default function TeamSelectPage() {
       <div className="w-full max-w-3xl mx-auto bg-white border border-gray-300 rounded-lg p-6 shadow-sm">
         <p className="text-xs text-gray-400 mb-2">画面ID: S-03</p>
         <h1 className="text-xl font-semibold text-gray-800 mb-6">チーム選択</h1>
-
-        <p className="text-xs text-gray-500 mb-3">
-          所属チームから1つ選択 → そのチームのダッシュボードへ
-        </p>
-
         {loading && (
           <p className="text-sm text-gray-500 py-4">読み込み中…</p>
         )}
@@ -111,37 +102,47 @@ export default function TeamSelectPage() {
             所属チームがありません。下のフォームでチームを作成するか、招待リンクから参加してください。
           </p>
         )}
-        {!loading && teams.length > 0 && (
-          <>
-            <ul className="list-none p-0 m-0 space-y-2">
-              {teams.map((team) => (
-                <li key={team.id}>
-                  <Link
-                    href={`/dashboard/${team.id}`}
-                    className="block border border-gray-300 rounded-md py-4 px-4 bg-gray-50 hover:bg-gray-100 cursor-pointer"
+        {!loading && teams.length > 0 && (() => {
+          const canCreateTeam = teams.some((t) => t.role === "leader");
+          return (
+            <>
+              <ul className="list-none p-0 m-0 space-y-2">
+                {teams.map((team) => (
+                  <li key={team.id}>
+                    <Link
+                      href={`/dashboard/${team.id}`}
+                      className="block border border-gray-300 rounded-md py-4 px-4 bg-gray-50 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <span className="text-base font-medium">{team.name}</span>
+                      <span className="text-xs text-gray-500 block mt-1">
+                        {roleLabel(team.role)}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              {!canCreateTeam && (
+                <p className="text-sm text-gray-500 py-3 mt-2">
+                  新しいチームの作成はリーダーのみ可能です。招待リンクから参加するか、リーダーにご相談ください。
+                </p>
+              )}
+              {canCreateTeam && !showCreateForm && (
+                <p className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateForm(true)}
+                    className="text-sm text-indigo-600 hover:underline"
                   >
-                    <span className="text-base font-medium">{team.name}</span>
-                    <span className="text-xs text-gray-500 block mt-1">
-                      {roleLabel(team.role)}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            {!showCreateForm && (
-              <p className="mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateForm(true)}
-                  className="text-sm text-indigo-600 hover:underline"
-                >
-                  ＋ 新しいチームを作成
-                </button>
-              </p>
-            )}
-          </>
-        )}
-        {(showCreateForm || teams.length === 0) && !loading && (
+                    ＋ 新しいチームを作成
+                  </button>
+                </p>
+              )}
+            </>
+          );
+        })()}
+        {!loading && (() => {
+          const canCreateTeam = teams.length === 0 || teams.some((t) => t.role === "leader");
+          return canCreateTeam && (showCreateForm || teams.length === 0) && (
           <form onSubmit={handleCreateTeam} className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50 space-y-3">
             <h2 className="text-sm font-medium text-gray-700">
               {teams.length === 0 ? "チームを作成" : "新しいチームを作成"}
@@ -194,9 +195,10 @@ export default function TeamSelectPage() {
               </button>
             </div>
           </form>
-        )}
+          );
+        })()}
         <p className="text-[11px] text-gray-400 mt-4">
-          ※ 所属1チームの場合は自動でダッシュボードへ移動します。「チームを追加」から新規作成できます。
+          ※ 所属1チームの場合でもチーム選択画面を表示します。チーム名をクリックしてダッシュボードへ移動できます。リーダーは「チームを追加」から新規作成できます。
         </p>
       </div>
     </main>
