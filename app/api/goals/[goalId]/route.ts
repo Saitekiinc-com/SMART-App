@@ -25,6 +25,7 @@ async function getAuthAndMembership(goalId: string) {
     include: {
       team: { select: { id: true } },
       approaches: { orderBy: { sortOrder: "asc" } },
+      feedback: { select: { content: true } },
       _count: { select: { votes: true } },
     },
   });
@@ -72,6 +73,7 @@ export async function GET(_request: Request, context: Context) {
     deadline: goal.deadline.toISOString().slice(0, 10),
     status: goal.status,
     voteCount: goal._count.votes,
+    feedback: goal.feedback?.content ?? null,
     hasVoted,
     canEdit,
     approaches: goal.approaches.map((a) => ({
@@ -196,6 +198,59 @@ export async function PATCH(request: Request, context: Context) {
     where: { id: goalId },
     data: { status },
   });
+
+  // F-013: ステータス変更 → 所有者とリーダーへ。ゴール完了(DONE) → チーム全員へ
+  const STATUS_LABEL: Record<string, string> = {
+    TODO: "未着手",
+    IN_PROGRESS: "進行中",
+    DONE: "完了",
+  };
+  const goalWithOwner = await prisma.smartGoal.findUnique({
+    where: { id: goalId },
+    select: { title: true, teamId: true, owner: { select: { userId: true } } },
+  });
+  if (goalWithOwner) {
+    const teamId = goalWithOwner.teamId;
+    const ownerUserId = goalWithOwner.owner.userId;
+    const members = await prisma.teamMember.findMany({
+      where: { teamId },
+      select: { userId: true, role: true },
+    });
+    const changerId = result.user.id;
+    const excludeChanger = (id: string) => id !== changerId;
+    const title = goalWithOwner.title;
+    const statusLabel = STATUS_LABEL[status] ?? status;
+
+    if (status === "DONE") {
+      const message = `「${title}」が完了しました`.slice(0, 500);
+      const recipientIds = members.map((m) => m.userId).filter(excludeChanger);
+      if (recipientIds.length > 0) {
+        await prisma.notification.createMany({
+          data: recipientIds.map((userId) => ({
+            userId,
+            type: "GOAL_COMPLETED",
+            message,
+            goalId,
+          })),
+        });
+      }
+    } else {
+      const message = `「${title}」のステータスが${statusLabel}に変更されました`.slice(0, 500);
+      const leaderIds = members.filter((m) => m.role === "leader").map((m) => m.userId);
+      const recipientIds = [ownerUserId, ...leaderIds].filter((id, i, arr) => arr.indexOf(id) === i).filter(excludeChanger);
+      if (recipientIds.length > 0) {
+        await prisma.notification.createMany({
+          data: recipientIds.map((userId) => ({
+            userId,
+            type: "STATUS_CHANGED",
+            message,
+            goalId,
+          })),
+        });
+      }
+    }
+  }
+
   return Response.json({ ok: true });
 }
 

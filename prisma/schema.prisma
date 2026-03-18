@@ -27,6 +27,7 @@ model User {
   invitations    Invitation[]
   votes          Vote[]
   notifications  Notification[]
+  goalFeedbacks GoalFeedback[]
 
   @@map("users")
 }
@@ -88,6 +89,7 @@ model SmartGoal {
   approaches    Approach[]
   votes         Vote[]
   notifications Notification[]
+  feedback      GoalFeedback?
 
   @@map("smart_goals")
 }
@@ -153,4 +155,20 @@ model Notification {
   goal SmartGoal? @relation(fields: [goalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("notifications")
+}
+
+// 9. goal_feedback（完了時フィードバック）
+model GoalFeedback {
+  id        String   @id @default(uuid()) @db.Uuid
+  goalId    String   @unique @map("goal_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  content   String   @db.VarChar(2000)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime? @map("updated_at") @db.Timestamp(0)
+
+  // Relations
+  goal SmartGoal @relation(fields: [goalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("goal_feedback")
 }

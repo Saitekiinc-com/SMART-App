@@ -7,7 +7,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader, getBackHeaderProps } from "@/components/AppHeader";
 
 const STATUS_LABEL: Record<string, string> = {
   TODO: "未着手",
@@ -34,6 +34,7 @@ type Goal = {
   voteCount: number;
   hasVoted: boolean;
   canEdit: boolean;
+  feedback: string | null;
   approaches: { id: string; content: string; completed: boolean; sortOrder: number }[];
 };
 
@@ -44,6 +45,8 @@ export default function GoalDetailPage() {
   const [goal, setGoal] = useState<Goal | null>(null);
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [feedbackContent, setFeedbackContent] = useState("");
+  const [feedbackSaving, setFeedbackSaving] = useState(false);
 
   async function fetchGoal() {
     setError("");
@@ -56,6 +59,7 @@ export default function GoalDetailPage() {
     }
     const data = await res.json();
     setGoal(data);
+    setFeedbackContent((data.feedback as string | null) ?? "");
   }
 
   useEffect(() => {
@@ -126,6 +130,29 @@ export default function GoalDetailPage() {
     }
   }
 
+  async function handleSaveFeedback() {
+    if (!goal || feedbackSaving) return;
+    if (goal.status !== "DONE") return;
+
+    setFeedbackSaving(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/goals/${goalId}/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: feedbackContent }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError((data.error as string) || "保存に失敗しました");
+        return;
+      }
+      await fetchGoal(); // 保存後の内容を反映
+    } finally {
+      setFeedbackSaving(false);
+    }
+  }
+
   if (!goal && !error) {
     return (
       <div className="w-full max-w-3xl min-h-screen mx-auto bg-white border border-gray-300 shadow-sm p-4">
@@ -155,13 +182,7 @@ export default function GoalDetailPage() {
 
   return (
     <div className="w-full max-w-3xl min-h-screen mx-auto bg-white border border-gray-300 shadow-sm">
-      <AppHeader
-        leftContent={
-          <Link href={`/dashboard/${goal.teamId}`} className="text-sm text-gray-700 hover:underline">
-            ← 戻る
-          </Link>
-        }
-      />
+      <AppHeader {...getBackHeaderProps(`/dashboard/${goal.teamId}`)} />
 
       <main className="p-4">
         <p className="text-xs text-gray-400 mb-2">画面ID: S-06</p>
@@ -176,10 +197,10 @@ export default function GoalDetailPage() {
             </span>
           </div>
           <div className="text-[13px] text-gray-600 mb-4 space-y-1">
-            <p><span className="text-gray-500">Specific:</span> {goal.specific}</p>
-            <p><span className="text-gray-500">Measurable:</span> {goal.measurable}</p>
-            <p><span className="text-gray-500">Achievable:</span> {goal.achievable ? "はい" : "いいえ"}</p>
-            <p><span className="text-gray-500">Relevant:</span> {goal.relevant}</p>
+            <p><span className="text-gray-500">具体的:</span> {goal.specific}</p>
+            <p><span className="text-gray-500">測定可能:</span> {goal.measurable}</p>
+            <p><span className="text-gray-500">達成可能:</span> {goal.achievable ? "はい" : "いいえ"}</p>
+            <p><span className="text-gray-500">関連性:</span> {goal.relevant}</p>
             <p><span className="text-gray-500">期限:</span> {goal.deadline}</p>
           </div>
 
@@ -189,7 +210,7 @@ export default function GoalDetailPage() {
               <button
                 type="button"
                 onClick={handleVote}
-                disabled={actionLoading}
+                disabled={actionLoading || goal.status !== "TODO"}
                 className="py-2 px-4 border border-gray-800 rounded text-[13px] hover:bg-gray-200 disabled:opacity-50"
               >
                 {goal.hasVoted ? "投票を取り消す" : "投票する"}
@@ -265,6 +286,32 @@ export default function GoalDetailPage() {
               </div>
               <p className="mt-2 text-[11px] text-gray-400">※ 編集・削除は作成者またはリーダーのみ表示</p>
             </>
+          )}
+
+          {goal.status === "DONE" && (
+            <div className="mb-4">
+              <p className="text-xs text-gray-500 mb-2">完了時フィードバック入力</p>
+              <textarea
+                value={feedbackContent}
+                onChange={(e) => setFeedbackContent(e.target.value)}
+                maxLength={2000}
+                rows={4}
+                className="w-full py-2 px-2.5 border border-gray-300 rounded text-sm resize-none"
+                placeholder="ゴールを完了してみた感想や次の改善点など"
+                disabled={feedbackSaving}
+              />
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-[11px] text-gray-400">{feedbackContent.length}/2000</p>
+                <button
+                  type="button"
+                  onClick={handleSaveFeedback}
+                  disabled={feedbackSaving || !feedbackContent.trim()}
+                  className="py-2 px-4 bg-gray-800 text-white rounded text-[13px] hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {feedbackSaving ? "保存中…" : "保存"}
+                </button>
+              </div>
+            </div>
           )}
         </div>
 
