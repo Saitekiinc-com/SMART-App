@@ -7,6 +7,8 @@ import { redirect, notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AppHeader } from "@/components/AppHeader";
+import { FilterSortUI } from "@/components/ui/FilterSortUI";
+import { VoteUI } from "@/components/ui/VoteUI";
 
 const STATUS_LABEL: Record<string, string> = {
   TODO: "未着手",
@@ -22,8 +24,10 @@ const STATUS_STYLE: Record<string, string> = {
 
 export default async function DashboardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ teamId: string }>;
+  searchParams: Promise<{ status?: string; sort?: string }>;
 }) {
   const session = await auth();
   if (!session?.user?.email) {
@@ -31,6 +35,16 @@ export default async function DashboardPage({
   }
 
   const { teamId } = await params;
+  const sp = await searchParams;
+
+  const statusFilter = sp.status ?? "ALL";
+  const sortBy = sp.sort ?? "votes_desc";
+
+  const allowedStatus = new Set(["ALL", "TODO", "IN_PROGRESS", "DONE"]);
+  const safeStatusFilter = allowedStatus.has(statusFilter) ? statusFilter : "ALL";
+
+  const allowedSort = new Set(["votes_desc", "votes_asc", "deadline_asc", "createdAt_desc"]);
+  const safeSortBy = allowedSort.has(sortBy) ? sortBy : "votes_desc";
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
@@ -60,10 +74,19 @@ export default async function DashboardPage({
       _count: { select: { votes: true, approaches: true } },
       approaches: { select: { completed: true } },
     },
-    orderBy: { createdAt: "desc" },
   });
 
-  const goals = goalsRaw.map((g) => {
+  const goalIds = goalsRaw.map((g) => g.id);
+  const userVotes = await prisma.vote.findMany({
+    where: {
+      userId: user.id,
+      goalId: { in: goalIds },
+    },
+    select: { goalId: true },
+  });
+  const votedSet = new Set(userVotes.map((v) => v.goalId));
+
+  const allGoals = goalsRaw.map((g) => {
     const approachCompleted = g.approaches.filter((a) => a.completed).length;
     return {
       id: g.id,
@@ -72,22 +95,43 @@ export default async function DashboardPage({
       voteCount: g._count.votes,
       approachTotal: g._count.approaches,
       approachCompleted,
+      deadline: g.deadline,
+      createdAt: g.createdAt,
+      hasVoted: votedSet.has(g.id),
     };
   });
 
-  const inProgress = goals.filter((g) => g.status === "IN_PROGRESS").length;
-  const done = goals.filter((g) => g.status === "DONE").length;
-  const total = goals.length;
+  // サマリーはフィルターに影響されない（全ゴール基準）
+  const inProgress = allGoals.filter((g) => g.status === "IN_PROGRESS").length;
+  const done = allGoals.filter((g) => g.status === "DONE").length;
+  const total = allGoals.length;
   const achievedRate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  // 表示する一覧はフィルター/ソートを反映
+  let goals = allGoals;
+  if (safeStatusFilter !== "ALL") {
+    goals = goals.filter((g) => g.status === safeStatusFilter);
+  }
+
+  goals.sort((a, b) => {
+    if (safeSortBy === "votes_desc") {
+      return b.voteCount - a.voteCount || b.createdAt.getTime() - a.createdAt.getTime();
+    }
+    if (safeSortBy === "votes_asc") {
+      return a.voteCount - b.voteCount || b.createdAt.getTime() - a.createdAt.getTime();
+    }
+    if (safeSortBy === "deadline_asc") {
+      return a.deadline.getTime() - b.deadline.getTime() || b.createdAt.getTime() - a.createdAt.getTime();
+    }
+    // createdAt_desc
+    return b.createdAt.getTime() - a.createdAt.getTime();
+  });
 
   return (
     <div className="w-full max-w-3xl min-h-screen mx-auto bg-white border border-gray-300 shadow-sm relative">
       <AppHeader
-        leftContent={
-          <span className="text-sm font-semibold truncate max-w-[180px]" title={team.name}>
-            {team.name}
-          </span>
-        }
+        variant="dashboard"
+        teamName={team.name}
         teamId={teamId}
         showSettingsLink={membership.role === "leader"}
       />
@@ -103,35 +147,35 @@ export default async function DashboardPage({
           </p>
         </div>
 
-        <div className="flex gap-2 mb-3">
-          <span className="text-xs py-1.5 px-2.5 border border-gray-300 rounded">すべて</span>
-          <span className="text-xs py-1.5 px-2.5 border border-gray-200 rounded text-gray-400">未着手</span>
-          <span className="text-xs py-1.5 px-2.5 border border-gray-200 rounded text-gray-400">進行中</span>
-          <span className="text-xs py-1.5 px-2.5 border border-gray-200 rounded text-gray-400">完了</span>
-        </div>
+        <FilterSortUI teamId={teamId} status={safeStatusFilter} sortBy={safeSortBy} />
 
         <div className="space-y-3">
           {goals.length === 0 ? (
-            <p className="text-sm text-gray-500 py-4">ゴールがありません。右下の + から作成できます。</p>
+            <p className="text-sm text-gray-500 py-4">ゴールがありません。右下の「ゴール追加」から作成できます。</p>
           ) : (
             goals.map((g) => (
-              <Link
+              <div
                 key={g.id}
-                href={`/goals/${g.id}`}
-                className="block border border-gray-300 rounded-lg p-3.5 cursor-pointer hover:bg-gray-50"
+                className="border border-gray-300 rounded-lg p-3.5 hover:bg-gray-50 flex items-start gap-3"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-sm font-semibold">{g.title}</span>
-                  <span
-                    className={`text-[11px] py-0.5 px-2 rounded shrink-0 ${STATUS_STYLE[g.status] ?? "bg-gray-100 text-gray-800"}`}
-                  >
-                    {STATUS_LABEL[g.status] ?? g.status}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-500">
-                  投票: {g.voteCount}票　アプローチ進捗: {g.approachCompleted}/{g.approachTotal}
-                </p>
-              </Link>
+                <Link
+                  href={`/goals/${g.id}`}
+                  className="flex-1 min-w-0"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-sm font-semibold">{g.title}</span>
+                    <span
+                      className={`text-[11px] py-0.5 px-2 rounded shrink-0 ${STATUS_STYLE[g.status] ?? "bg-gray-100 text-gray-800"}`}
+                    >
+                      {STATUS_LABEL[g.status] ?? g.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    アプローチ進捗: {g.approachCompleted}/{g.approachTotal}
+                  </p>
+                </Link>
+                <VoteUI goalId={g.id} status={g.status} voteCount={g.voteCount} hasVoted={g.hasVoted} />
+              </div>
             ))
           )}
         </div>
@@ -139,10 +183,10 @@ export default async function DashboardPage({
 
       <Link
         href={`/dashboard/${teamId}/goals/new`}
-        className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-gray-800 text-white flex items-center justify-center text-2xl shadow-lg"
-        aria-label="新規ゴール"
+        className="absolute bottom-6 right-6 py-3 px-4 rounded-lg bg-gray-800 text-white text-sm font-medium shadow-lg hover:bg-gray-700"
+        aria-label="ゴール追加"
       >
-        +
+        ゴール追加
       </Link>
     </div>
   );
