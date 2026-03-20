@@ -1,0 +1,8 @@
+/* SMART Team Goals - グローバルスタイル */
+/* 10_スタイル設計に準拠。Tailwind 利用時は app/layout で import */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  /* デザイントークン（拡張用） */
+}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S-10 招待リンク生成モーダル（ワイヤーフレーム）</title>
+</head>
+<body style="margin:0;font-family:sans-serif;background:#f0f0f0;min-height:100vh;box-sizing:border-box;">
+  <div style="width:100%;max-width:400px;margin:0 auto;min-height:100vh;position:relative;">
+    <!-- 背景（呼び出し元：チーム設定 S-09） -->
+    <div style="padding:16px;background:#e8e8e8;">
+      <p style="margin:0;font-size:12px;color:#999;">チーム設定画面から「招待」で表示 → オーバーレイでモーダル（リーダーのみ）</p>
+    </div>
+
+    <!-- オーバーレイ -->
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:flex-start;justify-content:center;padding:24px;box-sizing:border-box;">
+      <!-- 招待リンク生成モーダル InviteLinkModal -->
+      <div style="width:100%;max-width:360px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.15);overflow:hidden;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid #eee;">
+          <h2 style="margin:0;font-size:16px;font-weight:600;">招待リンク</h2>
+          <button style="padding:4px 8px;border:1px solid #ccc;border-radius:4px;font-size:12px;">閉じる</button>
+        </div>
+        <div style="padding:16px;">
+          <p style="margin:0 0 8px 0;font-size:12px;color:#666;">招待URL</p>
+          <div style="padding:12px;background:#f5f5f5;border:1px solid #ddd;border-radius:4px;font-size:12px;word-break:break-all;margin-bottom:12px;">
+            https://app.example.com/invite/abc123xyz
+          </div>
+          <button style="width:100%;padding:12px;background:#333;color:#fff;border:none;border-radius:4px;font-size:14px;">コピー</button>
+          <p style="margin:12px 0 0 0;font-size:11px;color:#888;">有効期限: 7日間</p>
+        </div>
+        <p style="margin:0;padding:12px 16px;font-size:11px;color:#888;border-top:1px solid #eee;">画面ID: S-10　閉じる→チーム設定に留まる</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

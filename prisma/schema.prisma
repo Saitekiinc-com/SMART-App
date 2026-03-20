@@ -1,0 +1,174 @@
+// SMART Team Goals - Prisma Schema
+// 06_詳細設計_データ設計/01_データベース詳細設計書 に準拠
+// マイグレーション: prisma/migrations/
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 1. users（ユーザー）
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String    @db.VarChar(100)
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  iconUrl      String?   @map("icon_url") @db.VarChar(500)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt    DateTime? @map("updated_at") @db.Timestamp(0)
+
+  // Relations
+  teamsAsCreator Team[]         @relation("TeamCreator")
+  teamMembers    TeamMember[]
+  invitations    Invitation[]
+  votes          Vote[]
+  notifications  Notification[]
+  goalFeedbacks GoalFeedback[]
+
+  @@map("users")
+}
+
+// 2. teams（チーム）
+model Team {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String    @db.VarChar(50)
+  description String?   @db.VarChar(200)
+  createdById String    @map("created_by_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime? @map("updated_at") @db.Timestamp(0)
+
+  // Relations
+  creator     User         @relation("TeamCreator", fields: [createdById], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  members     TeamMember[]
+  smartGoals  SmartGoal[]
+  invitations Invitation[]
+
+  @@map("teams")
+}
+
+// 3. team_members（チームメンバー）
+model TeamMember {
+  id        String   @id @default(uuid()) @db.Uuid
+  teamId    String   @map("team_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  role      String   @db.VarChar(20) // 'leader' | 'member'
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  // Relations
+  team       Team        @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  smartGoals SmartGoal[]
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+// 4. smart_goals（SMARTゴール）
+model SmartGoal {
+  id         String    @id @default(uuid()) @db.Uuid
+  teamId     String    @map("team_id") @db.Uuid
+  title      String    @db.VarChar(100)
+  specific   String    @db.Text
+  measurable String    @db.Text
+  achievable Boolean
+  relevant   String    @db.Text
+  deadline   DateTime  @db.Date
+  ownerId    String    @map("owner_id") @db.Uuid
+  status     String    @default("TODO") @db.VarChar(20) // 'TODO' | 'IN_PROGRESS' | 'DONE'
+  voteCount  Int       @default(0) @map("vote_count")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt  DateTime? @map("updated_at") @db.Timestamp(0)
+
+  // Relations
+  team          Team           @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  owner         TeamMember     @relation(fields: [ownerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  approaches    Approach[]
+  votes         Vote[]
+  notifications Notification[]
+  feedback      GoalFeedback?
+
+  @@map("smart_goals")
+}
+
+// 5. approaches（アプローチ・手順）
+model Approach {
+  id        String  @id @default(uuid()) @db.Uuid
+  goalId    String  @map("goal_id") @db.Uuid
+  content   String  @db.VarChar(200)
+  completed Boolean @default(false)
+  sortOrder Int     @map("sort_order")
+
+  // Relations
+  goal SmartGoal @relation(fields: [goalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("approaches")
+}
+
+// 6. votes（投票）
+model Vote {
+  id      String   @id @default(uuid()) @db.Uuid
+  goalId  String   @map("goal_id") @db.Uuid
+  userId  String   @map("user_id") @db.Uuid
+  votedAt DateTime @default(now()) @map("voted_at") @db.Timestamp(0)
+
+  // Relations
+  goal SmartGoal @relation(fields: [goalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([goalId, userId])
+  @@map("votes")
+}
+
+// 7. invitations（招待）
+model Invitation {
+  id        String    @id @default(uuid()) @db.Uuid
+  token     String    @unique @db.VarChar(64)
+  teamId    String    @map("team_id") @db.Uuid
+  inviterId String    @map("inviter_id") @db.Uuid
+  expiresAt DateTime  @map("expires_at") @db.Timestamp(0)
+  used      Boolean   @default(false)
+  usedAt    DateTime? @map("used_at") @db.Timestamp(0)
+
+  // Relations
+  team    Team @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  inviter User @relation(fields: [inviterId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("invitations")
+}
+
+// 8. notifications（通知）
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  type      String   @db.VarChar(30) // 'GOAL_CREATED' | 'STATUS_CHANGED' | 'DEADLINE_REMINDER' | 'GOAL_COMPLETED'
+  message   String   @db.VarChar(500)
+  goalId    String?  @map("goal_id") @db.Uuid
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  // Relations
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  goal SmartGoal? @relation(fields: [goalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("notifications")
+}
+
+// 9. goal_feedback（完了時フィードバック）
+model GoalFeedback {
+  id        String   @id @default(uuid()) @db.Uuid
+  goalId    String   @unique @map("goal_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  content   String   @db.VarChar(2000)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime? @map("updated_at") @db.Timestamp(0)
+
+  // Relations
+  goal SmartGoal @relation(fields: [goalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("goal_feedback")
+}

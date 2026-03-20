@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S-09 チーム設定（ワイヤーフレーム）</title>
+</head>
+<body style="margin:0;font-family:sans-serif;background:#f0f0f0;min-height:100vh;box-sizing:border-box;">
+  <div style="width:100%;max-width:400px;margin:0 auto;min-height:100vh;background:#fff;border:1px solid #ccc;box-shadow:0 0 12px rgba(0,0,0,0.06);">
+    <!-- アプリヘッダー AppHeader -->
+    <header style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #eee;">
+      <span style="font-size:14px;">← 戻る</span>
+      <div style="display:flex;gap:12px;">
+        <span style="width:24px;height:24px;border:1px solid #ccc;border-radius:4px;"></span>
+        <span style="width:24px;height:24px;border:1px solid #ccc;border-radius:50%;"></span>
+      </div>
+    </header>
+
+    <main style="padding:16px;">
+      <p style="margin:0 0 8px 0;font-size:12px;color:#888;">画面ID: S-09　※リーダーのみアクセス可</p>
+      <h1 style="margin:0 0 20px 0;font-size:18px;font-weight:600;color:#333;">チーム設定</h1>
+
+      <!-- チーム設定フォーム TeamSettingsContent -->
+      <div style="margin-bottom:24px;">
+        <p style="margin:0 0 8px 0;font-size:12px;color:#666;">チーム情報</p>
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-size:12px;margin-bottom:4px;">チーム名</label>
+          <input type="text" value="〇〇チーム" readonly style="width:100%;padding:10px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;">
+        </div>
+        <button style="padding:10px 16px;background:#333;color:#fff;border:none;border-radius:4px;font-size:13px;">保存</button>
+      </div>
+
+      <!-- メンバー一覧 -->
+      <div style="margin-bottom:24px;">
+        <p style="margin:0 0 12px 0;font-size:12px;color:#666;">メンバー一覧</p>
+        <ul style="margin:0;padding:0;list-style:none;border:1px solid #eee;border-radius:8px;overflow:hidden;">
+          <li style="padding:12px 16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
+            <span>山田 太郎</span>
+            <span style="font-size:11px;color:#666;">リーダー</span>
+          </li>
+          <li style="padding:12px 16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
+            <span>佐藤 花子</span>
+            <button style="padding:4px 8px;font-size:11px;border:1px solid #c00;color:#c00;border-radius:4px;background:#fff;">削除</button>
+          </li>
+          <li style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+            <span>鈴木 一郎</span>
+            <button style="padding:4px 8px;font-size:11px;border:1px solid #c00;color:#c00;border-radius:4px;background:#fff;">削除</button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 招待リンク生成（S-10モーダルを開く） -->
+      <button style="width:100%;padding:12px;background:#fff;border:1px solid #333;border-radius:4px;font-size:14px;">招待リンクを生成</button>
+      <p style="margin:8px 0 0 0;font-size:11px;color:#888;">→ S-10 招待リンク生成モーダルを表示</p>
+    </main>
+  </div>
+</body>
+</html>
